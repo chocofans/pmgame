@@ -1,43 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>ganyu</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #020617, #020617, #0f172a);
-      color: #e5e7eb;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    .box {
-      text-align: center;
-    }
-    h1 {
-      font-size: 4rem;
-      font-weight: 600;
-      letter-spacing: 2px;
-      margin: 0;
-    }
-    p {
-      margin-top: 10px;
-      opacity: 0.6;
-      font-size: 14px;
-      letter-spacing: 1px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>cecilia</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+  :root {
+    --bg-opacity: 0.55;
+  }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    font-family: system-ui, sans-serif;
+    background-image: url("https://static.wikitide.net/strinovawiki/0/01/Celestia_Pledge.png");
+    background-size: cover;
+    background-position: center;
+    color: #e5e7eb;
+  }
+
+  /* background overlay (opacity controlled) */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, var(--bg-opacity));
+    z-index: 0;
+    transition: background 0.2s ease;
+  }
+
+  /* sidebar */
+  .panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: rgba(2, 6, 23, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 24px;
+    box-sizing: border-box;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .title {
+    font-size: 2rem;
+    letter-spacing: 2px;
+  }
+
+  .sub {
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  .control {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  input[type="range"] {
+    width: 100%;
+  }
+</style>
 </head>
+
 <body>
 
-  <div class="box">
-    <h1>ganyu</h1>
-    <p>ganyu.pl</p>
+<!-- AUDIO -->
+<audio
+  id="bgm"
+  loop
+  preload="auto"
+>
+  <source src="https://cdn.discordapp.com/attachments/1484606215064391783/1489504073559572511/bg.mp3?ex=69d34b44&is=69d1f9c4&hm=e12cf0d796b8b397bfb32ed5b83fa7bf265fcf42ea30ae478b7e0427b67b28ae&" type="audio/mpeg">
+</audio>
+
+<!-- SIDEBAR -->
+<div class="panel">
+  <div>
+    <div class="title">test</div>
+    <div class="sub">background audio test</div>
   </div>
+
+  <div class="control">
+    Volume
+    <input id="volume" type="range" min="0" max="100" value="40">
+  </div>
+
+  <div class="control">
+    Background Opacity
+    <input id="opacity" type="range" min="10" max="90" value="55">
+  </div>
+</div>
+
+<script>
+  const audio = document.getElementById("bgm");
+  const vol = document.getElementById("volume");
+  const opacity = document.getElementById("opacity");
+
+  // start muted for autoplay policy
+  audio.volume = 0;
+  audio.play().catch(() => {});
+
+  let activated = false;
+
+  // user interaction unlocks audio
+  document.addEventListener("click", () => {
+    if (!activated) {
+      activated = true;
+      audio.play();
+
+      // fade in to slider volume
+      const target = vol.value / 100;
+      let fade = setInterval(() => {
+        if (audio.volume < target) {
+          audio.volume += 0.02;
+        } else {
+          audio.volume = target;
+          clearInterval(fade);
+        }
+      }, 50);
+    }
+  }, { once: true });
+
+  // volume slider
+  vol.addEventListener("input", () => {
+    audio.volume = vol.value / 100;
+  });
+
+  // background opacity slider
+  opacity.addEventListener("input", () => {
+    document.documentElement.style.setProperty(
+      "--bg-opacity",
+      opacity.value / 100
+    );
+  });
+</script>
 
 </body>
 </html>
