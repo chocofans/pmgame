@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
 <meta charset="UTF-8" />
-<title>cecilia</title>
+<title>Ganyu.pl</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <style>
@@ -18,103 +18,96 @@
     background-size: cover;
     background-position: center;
     color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 
+  /* Dark overlay */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, var(--bg-opacity));
-    z-index: 0;
     transition: background 0.2s ease;
+    z-index: 0;
   }
 
-  /* sidebar */
-  .panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100%;
-    background: rgba(2, 6, 23, 0.85);
-    backdrop-filter: blur(10px);
-    padding: 24px;
-    box-sizing: border-box;
+  /* Centered text */
+  .center-text {
     z-index: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .title {
-    font-size: 2rem;
-    letter-spacing: 2px;
-  }
-
-  .sub {
-    font-size: 12px;
-    opacity: 0.6;
-  }
-
-  .control {
-    font-size: 13px;
+    font-size: 2.5rem;
+    letter-spacing: 1px;
     opacity: 0.8;
   }
 
-  input[type="range"] {
-    width: 100%;
+  /* Controls container */
+  .controls {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 2;
+    opacity: 0.15;
+    transition: opacity 0.2s ease;
+  }
+
+  .controls:hover {
+    opacity: 0.85;
+  }
+
+  .controls input[type="range"] {
+    width: 90px;
+    height: 4px;
+    cursor: pointer;
+  }
+
+  .label {
+    font-size: 10px;
+    opacity: 0.6;
+    margin-bottom: -2px;
   }
 </style>
 </head>
 
 <body>
 
-<!-- AUDIO -->
-<audio
-  id="bgm"
-  loop
-  preload="auto"
->
+<!-- Background Music -->
+<audio id="bgm" loop preload="auto">
   <source src="https://cdn.discordapp.com/attachments/1484606215064391783/1489504073559572511/bg.mp3?ex=69d34b44&is=69d1f9c4&hm=e12cf0d796b8b397bfb32ed5b83fa7bf265fcf42ea30ae478b7e0427b67b28ae&" type="audio/mpeg">
 </audio>
 
-<!-- SIDEBAR -->
-<div class="panel">
-  <div>
-    <div class="title">test</div>
-    <div class="sub">background audio test</div>
-  </div>
+<!-- Center Text -->
+<div class="center-text">wkrótce wyjdzie</div>
 
-  <div class="control">
-    Volume
-    <input id="volume" type="range" min="0" max="100" value="40">
-  </div>
+<!-- Controls -->
+<div class="controls">
+  <div class="label">VOL</div>
+  <input id="volume" type="range" min="0" max="100" value="35">
 
-  <div class="control">
-    Background Opacity
-    <input id="opacity" type="range" min="10" max="90" value="55">
-  </div>
+  <div class="label">BG</div>
+  <input id="opacity" type="range" min="10" max="90" value="55">
 </div>
 
 <script>
   const audio = document.getElementById("bgm");
-  const vol = document.getElementById("volume");
+  const volume = document.getElementById("volume");
   const opacity = document.getElementById("opacity");
 
-  // start muted for autoplay policy
   audio.volume = 0;
-  audio.play().catch(() => {});
 
   let activated = false;
 
-  // user interaction unlocks audio
+  // Unlock autoplay on first interaction
   document.addEventListener("click", () => {
     if (!activated) {
       activated = true;
       audio.play();
 
-      // fade in to slider volume
-      const target = vol.value / 100;
+      const target = volume.value / 100;
       let fade = setInterval(() => {
         if (audio.volume < target) {
           audio.volume += 0.02;
@@ -126,12 +119,12 @@
     }
   }, { once: true });
 
-  // volume slider
-  vol.addEventListener("input", () => {
-    audio.volume = vol.value / 100;
+  // Volume slider
+  volume.addEventListener("input", () => {
+    audio.volume = volume.value / 100;
   });
 
-  // background opacity slider
+  // Background opacity slider
   opacity.addEventListener("input", () => {
     document.documentElement.style.setProperty(
       "--bg-opacity",
