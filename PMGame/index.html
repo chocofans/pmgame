@@ -1,1 +1,90 @@
-<\html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Index of /</title>
+  <style>
+    body {
+      background-color: white;
+      font-family: monospace;
+      color: black;
+    }
+    h1 {
+      font-weight: normal;
+    }
+    a {
+      color: blue;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    pre {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Index of /</h1>
+<hr>
+
+<pre id="index"></pre>
+
+<hr>
+
+<script>
+  // Format date like Apache listings
+  function formatDate(date) {
+    return date.toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).replace(",", "");
+  }
+
+  const now = new Date();
+  const formattedDate = formatDate(now);
+
+  const entries = [
+    // Example folders (requested at top)
+    { name: "dev/", type: "dir" },
+    { name: "dev2/", type: "dir" },
+
+    // Actual folders from your listing
+    { name: "apk/", type: "dir" },
+    { name: "asset/", type: "dir" },
+    { name: "asset_dev/", type: "dir" },
+    { name: "asset_dev2/", type: "dir" },
+    { name: "asset_dev_2/", type: "dir" },
+    { name: "asset_dev_plan/", type: "dir" },
+    { name: "asset_dev_pre/", type: "dir" },
+    { name: "asset_intranet_test/", type: "dir" },
+    { name: "asset_master/", type: "dir" },
+    { name: "build_backup/", type: "dir" },
+    { name: "ipa/", type: "dir" },
+    { name: "itms-services/", type: "dir" },
+
+    // Files
+    { name: "bilibili.html", type: "file", size: "164" },
+    { name: "imsystem.json", type: "file", size: "3314" }
+  ];
+
+  let output = '';
+  output += `../../</a>\n`;
+
+  entries.forEach(item => {
+    const size = item.type === "dir" ? "-" : item.size;
+    output += `<a href="${item.name}me}</a>`
+           + `\t${formattedDate}\t${size}\n`;
+  });
+
+  document.getElementById("index").textContent = output;
+</script>
+
+</body>
+</html>
