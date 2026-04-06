@@ -1,143 +1,336 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-<meta charset="UTF-8" />
-<title>cecilia</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<title>Ganyu.pl</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-  :root {
-    --bg-opacity: 0.55;
-  }
+:root{--bg-opacity:0.55}
 
-  body {
-    margin: 0;
-    height: 100vh;
-    font-family: system-ui, sans-serif;
-    background-image: url("https://static.wikitide.net/strinovawiki/0/01/Celestia_Pledge.png");
-    background-size: cover;
-    background-position: center;
-    color: #e5e7eb;
-  }
+*,
+*::before,
+*::after{
+user-select:none;
+-webkit-user-select:none;
+cursor:none
+}
 
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, var(--bg-opacity));
-    z-index: 0;
-    transition: background 0.2s ease;
-  }
+body{
+margin:0;
+height:100vh;
+font-family:system-ui,sans-serif;
+background:url("https://static.wikitide.net/strinovawiki/0/01/Celestia_Pledge.png") center/cover no-repeat;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+color:#fff
+}
 
-  /* sidebar */
-  .panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100%;
-    background: rgba(2, 6, 23, 0.85);
-    backdrop-filter: blur(10px);
-    padding: 24px;
-    box-sizing: border-box;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
+@media(max-width:768px){
+body{background-size:contain;background-position:center top}
+}
 
-  .title {
-    font-size: 2rem;
-    letter-spacing: 2px;
-  }
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:rgba(0,0,0,var(--bg-opacity));
+z-index:0;
+opacity:1;
+transition:opacity .8s ease
+}
 
-  .sub {
-    font-size: 12px;
-    opacity: 0.6;
-  }
+body.gotowe::before{
+opacity:.55
+}
 
-  .control {
-    font-size: 13px;
-    opacity: 0.8;
-  }
+.glass{
+background:rgba(255,255,255,0.1);
+border-radius:16px;
+box-shadow:0 4px 30px rgba(0,0,0,0.1);
+backdrop-filter:blur(8.6px);
+-webkit-backdrop-filter:blur(8.6px);
+transition:transform .15s,filter .15s
+}
 
-  input[type="range"] {
-    width: 100%;
-  }
+.dragging{
+filter:blur(2px);
+transform:scale(1.02)
+}
+
+.tulipan{
+position:fixed;
+z-index:2;
+font-size:2.6rem;
+padding:12px 20px;
+letter-spacing:1px;
+animation:blask 4s infinite
+}
+
+@keyframes blask{
+0%,100%{text-shadow:0 0 10px rgba(255,255,255,.25)}
+50%{text-shadow:0 0 18px rgba(255,255,255,.45)}
+}
+
+.kryształ{
+position:absolute;
+width:2px;
+height:2px;
+border-radius:50%;
+opacity:0;
+animation:iskra 3s forwards;
+pointer-events:none
+}
+
+@keyframes iskra{
+0%{transform:translateY(0);opacity:0}
+15%{opacity:.9}
+100%{transform:translateY(-60px);opacity:0}
+}
+
+.piwonia{
+position:fixed;
+top:12px;
+left:12px;
+padding:12px;
+z-index:3
+}
+
+.piwonia input{
+width:90px;
+touch-action:none
+}
+
+.płat{
+font-size:10px;
+opacity:.6
+}
+
+.kursor{
+position:fixed;
+width:14px;
+height:14px;
+border-radius:50%;
+pointer-events:none;
+z-index:9999;
+background:rgba(255,255,255,.12);
+border:1px solid rgba(255,255,255,.35);
+backdrop-filter:blur(6px);
+box-shadow:0 0 8px rgba(255,255,255,.15);
+transform:translate(-50%,-50%) scale(.85);
+opacity:.18;
+transition:opacity .25s,transform .25s,background .25s
+}
+
+.kursor.cień{
+opacity:.12
+}
+
+.kursor.aktywny{
+opacity:.9;
+transform:translate(-50%,-50%) scale(1.35);
+background:rgba(255,255,255,.28)
+}
+
+.krąg{
+position:fixed;
+width:14px;
+height:14px;
+border:1px solid rgba(255,255,255,.6);
+border-radius:50%;
+transform:translate(-50%,-50%) scale(0);
+animation:fala .8s forwards;
+pointer-events:none;
+z-index:9998
+}
+
+@keyframes fala{
+to{transform:translate(-50%,-50%) scale(4);opacity:0}
+}
+
+.tosia{
+position:fixed;
+right:10px;
+bottom:8px;
+font-size:11px;
+opacity:.9;
+text-shadow:0 0 12px rgba(255,255,255,.8),0 0 24px rgba(255,255,255,.4)
+}
 </style>
 </head>
 
 <body>
 
-<!-- AUDIO -->
-<audio
-  id="bgm"
-  loop
-  preload="auto"
->
-  <source src="https://cdn.discordapp.com/attachments/1484606215064391783/1489504073559572511/bg.mp3?ex=69d34b44&is=69d1f9c4&hm=e12cf0d796b8b397bfb32ed5b83fa7bf265fcf42ea30ae478b7e0427b67b28ae&" type="audio/mpeg">
+<audio id="mak" loop preload="auto">
+https://cdn.discordapp.com/attachments/1484606215064391783/1489504073559572511/bg.mp3
 </audio>
 
-<!-- SIDEBAR -->
-<div class="panel">
-  <div>
-    <div class="title">test</div>
-    <div class="sub">background audio test</div>
-  </div>
+<div class="tulipan glass" id="stokrotka">wkrótce wyjdzie</div>
 
-  <div class="control">
-    Volume
-    <input id="volume" type="range" min="0" max="100" value="40">
-  </div>
-
-  <div class="control">
-    Background Opacity
-    <input id="opacity" type="range" min="10" max="90" value="55">
-  </div>
+<div class="piwonia glass" id="bez">
+<div class="płat">VOL</div>
+<input id="jabłko" type="range" min="0" max="100" value="35">
+<div class="płat">BG</div>
+<input id="gruszka" type="range" min="10" max="90" value="55">
 </div>
 
+<div class="tosia">for tosia</div>
+
 <script>
-  const audio = document.getElementById("bgm");
-  const vol = document.getElementById("volume");
-  const opacity = document.getElementById("opacity");
+const mak=document.getElementById("mak")
+const jab=document.getElementById("jabłko")
+const gru=document.getElementById("gruszka")
+const sto=document.getElementById("stokrotka")
+const bez=document.getElementById("bez")
 
-  // start muted for autoplay policy
-  audio.volume = 0;
-  audio.play().catch(() => {});
+window.addEventListener("load",()=>{
+const r=sto.getBoundingClientRect()
+sto.style.left=r.left+"px"
+sto.style.top=r.top+"px"
+document.body.classList.add("gotowe")
+})
 
-  let activated = false;
+mak.volume=0
+document.addEventListener("pointerdown",()=>{
+if(mak.volume===0){
+mak.play()
+const t=jab.value/100
+const f=setInterval(()=>{
+if(mak.volume<t)mak.volume+=.02
+else clearInterval(f)
+},50)
+}
+},{once:true})
 
-  // user interaction unlocks audio
-  document.addEventListener("click", () => {
-    if (!activated) {
-      activated = true;
-      audio.play();
+jab.addEventListener("input",e=>{
+mak.volume=e.target.value/100
+iskra(bez,"rgba(120,190,255,.9)")
+})
 
-      // fade in to slider volume
-      const target = vol.value / 100;
-      let fade = setInterval(() => {
-        if (audio.volume < target) {
-          audio.volume += 0.02;
-        } else {
-          audio.volume = target;
-          clearInterval(fade);
-        }
-      }, 50);
-    }
-  }, { once: true });
+gru.addEventListener("input",e=>{
+document.documentElement.style.setProperty("--bg-opacity",e.target.value/100)
+iskra(bez,"rgba(120,190,255,.9)")
+})
 
-  // volume slider
-  vol.addEventListener("input", () => {
-    audio.volume = vol.value / 100;
-  });
+function przesuw(el){
+let a=false,x=0,y=0
+el.addEventListener("pointerdown",e=>{
+if(e.target.tagName==="INPUT")return
+const r=el.getBoundingClientRect()
+x=e.clientX-r.left
+y=e.clientY-r.top
+el.style.left=r.left+"px"
+el.style.top=r.top+"px"
+el.style.transform="none"
+a=true
+el.classList.add("dragging")
+})
+document.addEventListener("pointermove",e=>{
+if(!a)return
+el.style.left=e.clientX-x+"px"
+el.style.top=e.clientY-y+"px"
+})
+document.addEventListener("pointerup",()=>{
+a=false
+el.classList.remove("dragging")
+})
+}
 
-  // background opacity slider
-  opacity.addEventListener("input", () => {
-    document.documentElement.style.setProperty(
-      "--bg-opacity",
-      opacity.value / 100
-    );
-  });
+przesuw(bez)
+przesuw(sto)
+
+function iskra(el,kol){
+const s=document.createElement("div")
+s.className="kryształ"
+s.style.background=kol
+s.style.left=Math.random()*el.offsetWidth+"px"
+el.appendChild(s)
+setTimeout(()=>s.remove(),3000)
+}
+
+setInterval(()=>iskra(sto,"white"),200)
+
+const n=4
+const kur=[],poz=[]
+let ost={x:0,y:0,t:0},aktywny=0
+
+for(let i=0;i<n;i++){
+const k=document.createElement("div")
+k.className="kursor"+(i?" cień":"")
+document.body.appendChild(k)
+kur.push(k)
+poz.push({x:0,y:0})
+}
+
+document.addEventListener("pointermove",e=>{
+const teraz=performance.now()
+const dx=e.clientX-ost.x
+const dy=e.clientY-ost.y
+const dt=teraz-ost.t||16
+const v=Math.hypot(dx,dy)/dt*1000
+if(v>1800)aktywny=teraz+3000
+ost={x:e.clientX,y:e.clientY,t:teraz}
+poz[0]={x:e.clientX,y:e.clientY}
+})
+
+function anim(){
+for(let i=poz.length-1;i>0;i--){
+poz[i].x+=(poz[i-1].x-poz[i].x)*.45
+poz[i].y+=(poz[i-1].y-poz[i].y)*.45
+}
+const on=performance.now()<aktywny
+kur.forEach((k,i)=>{
+k.style.left=poz[i].x+"px"
+k.style.top=poz[i].y+"px"
+k.classList.toggle("aktywny",on)
+})
+requestAnimationFrame(anim)
+}
+anim()
+
+document.addEventListener("pointerdown",e=>{
+const r=document.createElement("div")
+r.className="krąg"
+r.style.left=e.clientX+"px"
+r.style.top=e.clientY+"px"
+document.body.appendChild(r)
+setTimeout(()=>r.remove(),800)
+})
+
+let ostatniaAkcja=Date.now()
+let vx=0.2,vy=0.2,tempo=0
+
+function resetBez(){
+ostatniaAkcja=Date.now()
+tempo=0
+}
+
+["pointermove","pointerdown","wheel","keydown","touchstart"].forEach(ev=>{
+document.addEventListener(ev,resetBez,{passive:true})
+})
+
+function wygaszacz(){
+const teraz=Date.now()
+if(teraz-ostatniaAkcja>60000){
+tempo=Math.min(1,tempo+0.003)
+const speed=0.3+tempo*1.5
+const r=bez.getBoundingClientRect()
+let x=parseFloat(bez.style.left)||r.left
+let y=parseFloat(bez.style.top)||r.top
+x+=vx*speed
+y+=vy*speed
+if(x<=0||x+r.width>=innerWidth)vx*=-1
+if(y<=0||y+r.height>=innerHeight)vy*=-1
+bez.style.left=x+"px"
+bez.style.top=y+"px"
+}else{
+tempo=0
+}
+requestAnimationFrame(wygaszacz)
+}
+wygaszacz()
 </script>
 
 </body>
