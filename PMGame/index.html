@@ -4,15 +4,12 @@
   <meta charset="UTF-8">
   <title>Index of /</title>
 
-  cursor.css
-
   <style>
     body {
       background: white;
       font-family: monospace;
       color: black;
       margin: 16px;
-      cursor: none;
     }
 
     h1 {
@@ -43,8 +40,6 @@
 
 <hr>
 
-cursor.js
-
 <script>
 function formatDate(date) {
   return date.toLocaleString("en-GB", {
@@ -60,33 +55,16 @@ function formatDate(date) {
 const formattedDate = formatDate(new Date());
 
 const entries = [
-  { name: "dev/", type: "dir" },
-  { name: "dev2/", type: "dir" },
-
-  { name: "apk/", type: "dir" },
-  { name: "asset/", type: "dir" },
-  { name: "asset_dev/", type: "dir" },
-  { name: "asset_dev2/", type: "dir" },
-  { name: "asset_dev_2/", type: "dir" },
-  { name: "asset_dev_plan/", type: "dir" },
-  { name: "asset_dev_pre/", type: "dir" },
-  { name: "asset_intranet_test/", type: "dir" },
-  { name: "asset_master/", type: "dir" },
-  { name: "build_backup/", type: "dir" },
-  { name: "ipa/", type: "dir" },
-  { name: "itms-services/", type: "dir" },
-
-  { name: "bilibili.html", type: "file", size: "164" },
-  { name: "imsystem.json", type: "file", size: "3314" }
+  { name: "klbq-overseas/", type: "dir" },
+  { name: "klbq-cn/", type: "dir" },
+  { name: "klbq-dev/", type: "dir" }
 ];
 
 let html = '';
-html += `../../</a>\n`;
+html += `<a href="../`;
 
 entries.forEach(e => {
-  const size = e.type === "dir" ? "-" : e.size;
-  html += `${e.name}${e.name}</a>`;
-  html += `\t${formattedDate}\t${size}\n`;
+  html += `<a href="${e.name}</a>\t${formattedDate}\t-\n`;
 });
 
 document.getElementById("index").innerHTML = html;
