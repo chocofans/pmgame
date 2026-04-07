@@ -1,73 +1,254 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-motyw="jasny">
 <head>
-  <meta charset="UTF-8">
-  <title>Index of /</title>
+<meta charset="UTF-8">
+<title>Index of /</title>
 
-  <style>
-    body {
-      background: white;
-      font-family: monospace;
-      color: black;
-      margin: 16px;
-    }
+<style>
+:root{
+  --tlo:#ffffff;
+  --tekst:#000000;
+  --link:#0645ad;
+  --linia:#ccc;
+  --mysz:rgba(0,0,0,.55);
+  --mysz-linia:rgba(0,0,0,.85);
+}
 
-    h1 {
-      font-weight: normal;
-    }
+[data-motyw="ciemny"]{
+  --tlo:#0b0f14;
+  --tekst:#e6edf3;
+  --link:#6ea8ff;
+  --linia:#222;
+  --mysz:rgba(255,255,255,.6);
+  --mysz-linia:rgba(255,255,255,.9);
+}
 
-    a {
-      color: blue;
-      text-decoration: none;
-    }
+*,
+*::before,
+*::after{
+  user-select:none;
+  -webkit-user-select:none;
+  cursor:none;
+}
 
-    a:hover {
-      text-decoration: underline;
-    }
+html,body{
+  width:100%;
+  height:100%;
+}
 
-    pre {
-      font-size: 14px;
-      line-height: 1.4;
-    }
-  </style>
+body{
+  margin:16px;
+  background:var(--tlo);
+  color:var(--tekst);
+  font-family:monospace;
+  transition:background .4s,color .4s;
+  overflow:hidden;
+}
+
+h1{font-weight:normal}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+pre{
+  font-size:14px;
+  line-height:1.45;
+  position:relative;
+  z-index:1;
+}
+hr{
+  border:none;
+  border-top:1px solid var(--linia);
+  margin:12px 0;
+}
+
+.zorza{
+  position:fixed;
+  inset:-20%;
+  z-index:0;
+  pointer-events:none;
+  opacity:0;
+  background:
+    linear-gradient(120deg,
+      rgba(130,255,255,.18),
+      rgba(120,160,255,.12),
+      rgba(90,120,255,.08),
+      transparent 60%),
+    radial-gradient(60% 40% at 30% 40%,
+      rgba(140,255,240,.18),
+      transparent 70%),
+    radial-gradient(50% 30% at 70% 65%,
+      rgba(180,150,255,.16),
+      transparent 75%);
+  filter:blur(60px) saturate(1.25);
+  animation:plyn 45s linear infinite;
+  transition:opacity .8s ease;
+}
+
+[data-motyw="ciemny"] .zorza{opacity:1}
+
+@keyframes plyn{
+  0%{transform:translate(0,0)}
+  50%{transform:translate(-6%,4%)}
+  100%{transform:translate(0,0)}
+}
+
+.pestka{
+  position:fixed;
+  top:14px;
+  right:14px;
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  z-index:5;
+}
+
+.kula{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 25%,
+      rgba(255,255,255,.9),
+      rgba(180,220,255,.6) 40%,
+      rgba(120,160,220,.35) 60%);
+  box-shadow:
+    inset 0 0 6px rgba(255,255,255,.8),
+    0 0 14px rgba(140,200,255,.45);
+  transition:filter .4s,box-shadow .4s;
+}
+
+[data-motyw="ciemny"] .kula{
+  filter:hue-rotate(40deg) brightness(.95);
+  box-shadow:
+    inset 0 0 6px rgba(255,255,255,.6),
+    0 0 18px rgba(140,200,255,.7);
+}
+
+.mycha{
+  position:fixed;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:9999;
+  background:var(--mysz);
+  border:1px solid var(--mysz-linia);
+  backdrop-filter:blur(4px);
+  box-shadow:0 0 10px var(--mysz);
+  transform:translate(-50%,-50%) scale(.85);
+  opacity:.22;
+  transition:opacity .25s,transform .25s,background .25s,border .25s;
+}
+
+.mycha.cien{opacity:.14}
+
+.mycha.zywa{
+  opacity:.9;
+  transform:translate(-50%,-50%) scale(1.35);
+}
+
+.krater{
+  position:fixed;
+  width:14px;
+  height:14px;
+  border:1px solid var(--mysz-linia);
+  border-radius:50%;
+  transform:translate(-50%,-50%) scale(0);
+  animation:fala .8s forwards;
+  pointer-events:none;
+  z-index:9998;
+}
+
+@keyframes fala{
+  to{
+    transform:translate(-50%,-50%) scale(4);
+    opacity:0;
+  }
+}
+</style>
 </head>
+
 <body>
+
+<div class="zorza"></div>
+
+<div class="pestka" id="sliwka">
+  <div class="kula"></div>
+</div>
 
 <h1>Index of /</h1>
 <hr>
-
-<pre id="index"></pre>
-
+<pre id="spis"></pre>
 <hr>
 
 <script>
-function formatDate(date) {
-  return date.toLocaleString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).replace(",", "");
+const kwiaty=[
+  {n:"klbq-overseas/",p:"/klbq-overseas/",d:"07 Apr 2026 09:36"},
+  {n:"klbq-cn/",p:"/klbq-cn/",d:"07 Apr 2026 09:21"},
+  {n:"klbq-dev/",p:"/klbq-dev/",d:"06 Apr 2026 22:48"}
+]
+
+let jagoda=`/../</a>\n`
+kwiaty.forEach(b=>{
+  jagoda+=`${b.p}${b.n}</a>\t${b.d}\t-\n`
+})
+document.getElementById("spis").innerHTML=jagoda
+
+const korzen=document.documentElement
+const zapis=localStorage.getItem("motyw")
+if(zapis) korzen.setAttribute("data-motyw",zapis)
+
+document.getElementById("sliwka").onclick=()=>{
+  const m=korzen.getAttribute("data-motyw")==="ciemny"?"jasny":"ciemny"
+  korzen.setAttribute("data-motyw",m)
+  localStorage.setItem("motyw",m)
 }
 
-const formattedDate = formatDate(new Date());
+const ile=4,myszy=[],polo=[]
+let ost={x:0,y:0,t:0},blask=0
 
-const entries = [
-  { name: "klbq-overseas/", type: "dir" },
-  { name: "klbq-cn/", type: "dir" },
-  { name: "klbq-dev/", type: "dir" }
-];
+for(let i=0;i<ile;i++){
+  const m=document.createElement("div")
+  m.className="mycha"+(i?" cien":"")
+  document.body.appendChild(m)
+  myszy.push(m)
+  polo.push({x:0,y:0})
+}
 
-let html = '';
-html += `<a href="../`;
+document.addEventListener("pointermove",e=>{
+  const teraz=performance.now()
+  const dx=e.clientX-ost.x
+  const dy=e.clientY-ost.y
+  const dt=teraz-ost.t||16
+  const v=Math.hypot(dx,dy)/dt*1000
+  if(v>1800) blask=teraz+3000
+  ost={x:e.clientX,y:e.clientY,t:teraz}
+  polo[0]={x:e.clientX,y:e.clientY}
+})
 
-entries.forEach(e => {
-  html += `<a href="${e.name}</a>\t${formattedDate}\t-\n`;
-});
+function kwitnij(){
+  for(let i=polo.length-1;i>0;i--){
+    polo[i].x+=(polo[i-1].x-polo[i].x)*.45
+    polo[i].y+=(polo[i-1].y-polo[i].y)*.45
+  }
+  const on=performance.now()<blask
+  myszy.forEach((m,i)=>{
+    m.style.left=polo[i].x+"px"
+    m.style.top=polo[i].y+"px"
+    m.classList.toggle("zywa",on)
+  })
+  requestAnimationFrame(kwitnij)
+}
+kwitnij()
 
-document.getElementById("index").innerHTML = html;
+document.addEventListener("pointerdown",e=>{
+  const r=document.createElement("div")
+  r.className="krater"
+  r.style.left=e.clientX+"px"
+  r.style.top=e.clientY+"px"
+  document.body.appendChild(r)
+  setTimeout(()=>r.remove(),800)
+})
 </script>
 
 </body>
