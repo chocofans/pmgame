@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ganyu XML Bucket Browser</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: #1a1d27;
+    border-bottom: 1px solid #2d3148;
+    padding: 16px 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  #url-input {
+    flex: 1;
+    min-width: 220px;
+    background: #0f1117;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #url-input:focus { border-color: #6366f1; }
+  #url-input::placeholder { color: #4a5068; }
+
+  button {
+    background: #6366f1;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 18px;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  button:hover { background: #818cf8; }
+  button:active { transform: scale(0.97); }
+  button:disabled { background: #2d3148; color: #4a5068; cursor: not-allowed; }
+
+  #btn-next { background: #0f9d6e; }
+  #btn-next:hover { background: #16c490; }
+  #btn-next:disabled { background: #2d3148; color: #4a5068; }
+
+  #btn-copy {
+    background: #2d3148;
+    color: #a5b4fc;
+  }
+  #btn-copy:hover { background: #3a3f5c; }
+
+  #btn-clear {
+    background: #2d3148;
+    color: #f87171;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+  #btn-clear:hover { background: #3a1f1f; }
+
+  .stats-bar {
+    background: #1a1d27;
+    border-bottom: 1px solid #2d3148;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: #6b7280;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .stats-bar span { color: #a5b4fc; font-weight: 600; }
+
+  #progress-bar {
+    height: 2px;
+    background: #6366f1;
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  #status {
+    padding: 6px 20px;
+    font-size: 12px;
+    color: #6b7280;
+    min-height: 24px;
+  }
+  #status.loading { color: #a5b4fc; }
+  #status.error { color: #f87171; }
+  #status.success { color: #34d399; }
+
+  #output {
+    flex: 1;
+    padding: 0 20px 20px;
+    overflow-y: auto;
+  }
+
+  .link-list {
+    list-style: none;
+    font-family: 'Consolas', 'Fira Mono', monospace;
+    font-size: 13px;
+  }
+
+  .link-list li {
+    border-bottom: 1px solid #1a1d27;
+    padding: 5px 0;
+    word-break: break-all;
+    color: #7dd3fc;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .link-list li a {
+    color: #7dd3fc;
+    text-decoration: none;
+    flex: 1;
+  }
+  .link-list li a:hover { color: #bae6fd; text-decoration: underline; }
+
+  .link-list li .size {
+    color: #4a5068;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .page-divider {
+    margin: 12px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #4a5068;
+  }
+  .page-divider::before, .page-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #2d3148;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #4a5068;
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state h2 { font-size: 16px; color: #6b7280; font-weight: 500; margin-bottom: 6px; }
+
+  @media (max-width: 600px) {
+    header { padding: 12px; gap: 8px; }
+    #url-input { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <input id="url-input" type="text" placeholder="https://your-bucket-cdn.example.com/" spellcheck="false" />
+  <button id="btn-fetch" onclick="fetchBucket(false)">Fetch</button>
+  <button id="btn-next" disabled onclick="fetchBucket(true)">Next Page ›</button>
+  <button id="btn-copy" onclick="copyAll()">Copy All</button>
+  <button id="btn-clear" onclick="clearAll()">Clear</button>
+</header>
+
+<div id="progress-bar"></div>
+<div id="status"></div>
+
+<div class="stats-bar" id="stats-bar" style="display:none">
+  Total loaded: <span id="stat-count">0</span> keys &nbsp;|&nbsp;
+  Pages fetched: <span id="stat-pages">0</span> &nbsp;|&nbsp;
+  Has more: <span id="stat-more">—</span> &nbsp;|&nbsp;
+  Bucket: <span id="stat-bucket">—</span>
+</div>
+
+<div id="output">
+  <div class="empty-state">
+    <div class="icon">🪣</div>
+    <h2>Enter a bucket URL above and click Fetch</h2>
+    <p style="font-size:13px;margin-top:4px;">Supports XML S3-compatible bucket listings (AWS, Tencent COS, etc.)</p>
+  </div>
+</div>
+
+<script>
+  let allKeys = [];
+  let nextMarker = '';
+  let isTruncated = false;
+  let baseUrl = '';
+  let pageCount = 0;
+  let listEl = null;
+
+  function setStatus(msg, type = '') {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = type;
+  }
+
+  function setProgress(pct) {
+    document.getElementById('progress-bar').style.width = pct + '%';
+  }
+
+  function updateStats() {
+    document.getElementById('stats-bar').style.display = 'flex';
+    document.getElementById('stat-count').textContent = allKeys.length.toLocaleString();
+    document.getElementById('stat-pages').textContent = pageCount;
+    document.getElementById('stat-more').textContent = isTruncated ? 'Yes' : 'No';
+    document.getElementById('btn-next').disabled = !isTruncated;
+  }
+
+  function parseSize(bytes) {
+    if (bytes === null || bytes === undefined) return '';
+    const n = parseInt(bytes);
+    if (isNaN(n)) return '';
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+    if (n < 1073741824) return (n / 1048576).toFixed(1) + ' MB';
+    return (n / 1073741824).toFixed(2) + ' GB';
+  }
+
+  async function fetchBucket(useMarker) {
+    const rawUrl = document.getElementById('url-input').value.trim();
+    if (!rawUrl) { setStatus('Please enter a bucket URL.', 'error'); return; }
+
+    if (!useMarker) {
+      baseUrl = rawUrl.split('?')[0];
+      if (!baseUrl.endsWith('/')) baseUrl += '/';
+      allKeys = [];
+      nextMarker = '';
+      pageCount = 0;
+      listEl = null;
+      document.getElementById('output').innerHTML = '';
+      document.getElementById('stats-bar').style.display = 'none';
+      document.getElementById('stat-bucket').textContent = '—';
+    }
+
+    let fetchUrl = baseUrl;
+    if (useMarker && nextMarker) {
+      fetchUrl += '?marker=' + encodeURIComponent(nextMarker);
+    }
+
+    document.getElementById('btn-fetch').disabled = true;
+    document.getElementById('btn-next').disabled = true;
+    setStatus('Fetching ' + fetchUrl + ' …', 'loading');
+    setProgress(30);
+
+    try {
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(fetchUrl);
+      let res, text;
+
+      try {
+        res = await fetch(fetchUrl);
+        if (!res.ok) throw new Error('Direct fetch failed: ' + res.status);
+        text = await res.text();
+      } catch (e) {
+        setStatus('Direct fetch blocked (CORS), trying proxy…', 'loading');
+        res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error('Proxy fetch failed: ' + res.status);
+        text = await res.text();
+      }
+
+      setProgress(70);
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, 'application/xml');
+
+      const parseErr = xml.querySelector('parsererror');
+      if (parseErr) throw new Error('XML parse error — response may not be a valid XML bucket listing.');
+
+      const nm = xml.querySelector('NextMarker');
+      nextMarker = nm ? nm.textContent.trim() : '';
+
+      const trunc = xml.querySelector('IsTruncated');
+      isTruncated = trunc && trunc.textContent.trim().toLowerCase() === 'true';
+
+      const bucketName = xml.querySelector('Name');
+      if (bucketName) document.getElementById('stat-bucket').textContent = bucketName.textContent.trim();
+
+      const contents = xml.querySelectorAll('Contents');
+      const newKeys = [];
+
+      contents.forEach(c => {
+        const key = c.querySelector('Key');
+        const size = c.querySelector('Size');
+        if (key) {
+          newKeys.push({
+            key: key.textContent.trim(),
+            size: size ? size.textContent.trim() : null
+          });
+        }
+      });
+
+      allKeys = allKeys.concat(newKeys.map(k => k.key));
+      pageCount++;
+
+      const outputEl = document.getElementById('output');
+      if (!listEl) {
+        outputEl.innerHTML = '';
+        listEl = document.createElement('ul');
+        listEl.className = 'link-list';
+        outputEl.appendChild(listEl);
+      }
+
+      const divider = document.createElement('div');
+      divider.className = 'page-divider';
+      divider.textContent = 'Page ' + pageCount + ' — ' + newKeys.length + ' keys';
+      outputEl.insertBefore(divider, listEl);
+      outputEl.appendChild(listEl);
+
+      newKeys.forEach(({key, size}) => {
+        const li = document.createElement('li');
+        const fullUrl = baseUrl + key;
+        li.innerHTML = `<a href="${escapeHtml(fullUrl)}" target="_blank" rel="noopener">${escapeHtml(fullUrl)}</a><span class="size">${escapeHtml(parseSize(size))}</span>`;
+        listEl.appendChild(li);
+      });
+
+      setProgress(100);
+      updateStats();
+      setStatus(`Loaded ${newKeys.length} keys (total: ${allKeys.length}). ` + (isTruncated ? `More available — click "Next Page".` : 'All keys loaded.'), 'success');
+      setTimeout(() => setProgress(0), 800);
+
+      if (newKeys.length > 0) {
+        listEl.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+    } catch (err) {
+      setProgress(0);
+      setStatus('Error: ' + err.message, 'error');
+      console.error(err);
+    } finally {
+      document.getElementById('btn-fetch').disabled = false;
+      updateStats();
+    }
+  }
+
+  function copyAll() {
+    if (!allKeys.length) { setStatus('Nothing to copy yet.', 'error'); return; }
+    const text = allKeys.map(k => baseUrl + k).join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      setStatus('Copied ' + allKeys.length + ' links to clipboard.', 'success');
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setStatus('Copied ' + allKeys.length + ' links to clipboard.', 'success');
+    });
+  }
+
+  function clearAll() {
+    allKeys = [];
+    nextMarker = '';
+    isTruncated = false;
+    baseUrl = '';
+    pageCount = 0;
+    listEl = null;
+    document.getElementById('output').innerHTML = '<div class="empty-state"><div class="icon">🪣</div><h2>Enter a bucket URL above and click Fetch</h2><p style="font-size:13px;margin-top:4px;">Supports XML S3-compatible bucket listings (AWS, Tencent COS, etc.)</p></div>';
+    document.getElementById('stats-bar').style.display = 'none';
+    document.getElementById('btn-next').disabled = true;
+    setStatus('');
+    setProgress(0);
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('url-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fetchBucket(false);
+  });
+</script>
+</body>
+</html>
