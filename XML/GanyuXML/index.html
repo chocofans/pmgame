@@ -3,194 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ganyu XML Bucket Browser</title>
+<title>Ganyu XML Bucket Browser v0.4</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; }
 
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #0f1117;
-    color: #e2e8f0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  header { background: #1a1d27; border-bottom: 1px solid #2d3148; padding: 12px 14px; display: flex; gap: 7px; align-items: center; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
 
-  header {
-    background: #1a1d27;
-    border-bottom: 1px solid #2d3148;
-    padding: 16px 20px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  #url-input {
-    flex: 1;
-    min-width: 220px;
-    background: #0f1117;
-    border: 1px solid #2d3148;
-    border-radius: 8px;
-    color: #e2e8f0;
-    font-size: 14px;
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
+  #url-input { flex: 1; min-width: 200px; background: #0f1117; border: 1px solid #2d3148; border-radius: 8px; color: #e2e8f0; font-size: 14px; padding: 9px 13px; outline: none; transition: border-color 0.2s; }
   #url-input:focus { border-color: #6366f1; }
   #url-input::placeholder { color: #4a5068; }
 
-  button {
-    background: #6366f1;
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 18px;
-    transition: background 0.2s, transform 0.1s;
-    white-space: nowrap;
-  }
-  button:hover { background: #818cf8; }
-  button:active { transform: scale(0.97); }
-  button:disabled { background: #2d3148; color: #4a5068; cursor: not-allowed; }
+  .btn { background: #6366f1; border: none; border-radius: 8px; color: #fff; cursor: pointer; font-size: 13px; font-weight: 600; padding: 9px 13px; transition: background 0.2s, transform 0.1s; white-space: nowrap; }
+  .btn:hover { background: #818cf8; }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { background: #2d3148 !important; color: #4a5068 !important; cursor: not-allowed; transform: none; }
 
   #btn-next { background: #0f9d6e; }
-  #btn-next:hover { background: #16c490; }
-  #btn-next:disabled { background: #2d3148; color: #4a5068; }
+  #btn-next:not(:disabled):hover { background: #16c490; }
+  #btn-load-all { background: #7c3aed; }
+  #btn-load-all:not(:disabled):hover { background: #8b5cf6; }
+  #btn-mode { background: #1e3a5f; color: #7dd3fc; }
+  #btn-mode:not(:disabled):hover { background: #1a4a7a; }
+  #btn-mode.active { background: #2a2010; color: #fbbf24; }
+  #btn-txt { background: #1e2535; color: #a5b4fc; }
+  #btn-txt:not(:disabled):hover { background: #2d3a55; }
+  #btn-clear { background: #1e1515; color: #f87171; }
+  #btn-clear:not(:disabled):hover { background: #2d1f1f; }
 
-  #btn-copy {
-    background: #2d3148;
-    color: #a5b4fc;
-  }
-  #btn-copy:hover { background: #3a3f5c; }
-
-  #btn-clear {
-    background: #2d3148;
-    color: #f87171;
-    font-size: 13px;
-    padding: 10px 14px;
-  }
-  #btn-clear:hover { background: #3a1f1f; }
-
-  .stats-bar {
-    background: #1a1d27;
-    border-bottom: 1px solid #2d3148;
-    padding: 8px 20px;
-    font-size: 12px;
-    color: #6b7280;
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .stats-bar span { color: #a5b4fc; font-weight: 600; }
-
-  #progress-bar {
-    height: 2px;
-    background: #6366f1;
-    width: 0%;
-    transition: width 0.3s;
-  }
-
-  #status {
-    padding: 6px 20px;
-    font-size: 12px;
-    color: #6b7280;
-    min-height: 24px;
-  }
+  #progress-bar { height: 2px; background: #6366f1; width: 0%; transition: width 0.3s; }
+  #status { padding: 4px 14px; font-size: 12px; color: #6b7280; min-height: 22px; }
   #status.loading { color: #a5b4fc; }
   #status.error { color: #f87171; }
   #status.success { color: #34d399; }
+  #status.warn { color: #fbbf24; }
 
-  #output {
-    flex: 1;
-    padding: 0 20px 20px;
-    overflow-y: auto;
-  }
+  .stats-bar { background: #1a1d27; border-bottom: 1px solid #2d3148; padding: 6px 14px; font-size: 12px; color: #6b7280; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .stats-bar span { color: #a5b4fc; font-weight: 600; }
 
-  .link-list {
-    list-style: none;
-    font-family: 'Consolas', 'Fira Mono', monospace;
-    font-size: 13px;
-  }
+  #output { flex: 1; padding: 8px 14px 20px; overflow-y: auto; }
 
-  .link-list li {
-    border-bottom: 1px solid #1a1d27;
-    padding: 5px 0;
-    word-break: break-all;
-    color: #7dd3fc;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .link-list li a {
-    color: #7dd3fc;
-    text-decoration: none;
-    flex: 1;
-  }
+  .link-list { list-style: none; font-family: 'Consolas', 'Fira Mono', monospace; font-size: 13px; }
+  .link-list li { border-bottom: 1px solid #161820; padding: 4px 0; word-break: break-all; display: flex; align-items: center; gap: 8px; }
+  .link-list li a { color: #7dd3fc; text-decoration: none; flex: 1; }
   .link-list li a:hover { color: #bae6fd; text-decoration: underline; }
+  .link-list li .meta { display: flex; gap: 7px; align-items: center; flex-shrink: 0; white-space: nowrap; font-size: 11px; }
+  .link-list li .size { color: #4a5568; }
+  .link-list li .date { color: #374151; }
 
-  .link-list li .size {
-    color: #4a5068;
-    font-size: 11px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .page-divider {
-    margin: 12px 0 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: #4a5068;
-  }
-  .page-divider::before, .page-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #2d3148;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #4a5068;
-  }
+  .empty-state { text-align: center; padding: 60px 20px; color: #4a5068; }
   .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
   .empty-state h2 { font-size: 16px; color: #6b7280; font-weight: 500; margin-bottom: 6px; }
 
-  @media (max-width: 600px) {
-    header { padding: 12px; gap: 8px; }
-    #url-input { font-size: 13px; }
+  /* Spinner overlay */
+  #loader-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; }
+  #loader-overlay.visible { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  .loader { position: relative; width: 2.8em; height: 2.8em; transform: rotate(165deg); }
+  .loader:before, .loader:after { content: ""; position: absolute; top: 50%; left: 50%; display: block; width: 0.5em; height: 0.5em; border-radius: 0.25em; transform: translate(-50%,-50%); }
+  .loader:before { animation: before8 2s infinite; }
+  .loader:after { animation: after6 2s infinite; }
+  @keyframes before8 {
+    0%   { width:0.5em; box-shadow: 1em -0.5em rgba(225,20,98,.75), -1em 0.5em rgba(111,202,220,.75); }
+    35%  { width:2.5em; box-shadow: 0 -0.5em rgba(225,20,98,.75), 0 0.5em rgba(111,202,220,.75); }
+    70%  { width:0.5em; box-shadow: -1em -0.5em rgba(225,20,98,.75), 1em 0.5em rgba(111,202,220,.75); }
+    100% { box-shadow: 1em -0.5em rgba(225,20,98,.75), -1em 0.5em rgba(111,202,220,.75); }
   }
+  @keyframes after6 {
+    0%   { height:0.5em; box-shadow: 0.5em 1em rgba(61,184,143,.75), -0.5em -1em rgba(233,169,32,.75); }
+    35%  { height:2.5em; box-shadow: 0.5em 0 rgba(61,184,143,.75), -0.5em 0 rgba(233,169,32,.75); }
+    70%  { height:0.5em; box-shadow: 0.5em -1em rgba(61,184,143,.75), -0.5em 1em rgba(233,169,32,.75); }
+    100% { box-shadow: 0.5em 1em rgba(61,184,143,.75), -0.5em -1em rgba(233,169,32,.75); }
+  }
+  #loader-label { font-size: 13px; color: #c7d2fe; background: rgba(15,17,23,0.9); padding: 5px 16px; border-radius: 20px; }
+
+  /* Folder tree */
+  .folder-tree { font-family: 'Consolas','Fira Mono',monospace; font-size: 13px; }
+  .f-folder { user-select: none; }
+  .f-folder-row { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; cursor: pointer; color: #fbbf24; transition: background 0.12s; }
+  .f-folder-row:hover { background: #1e2235; }
+  .f-toggle { font-size: 9px; color: #4a5068; width: 12px; flex-shrink: 0; }
+  .f-icon { flex-shrink: 0; }
+  .f-name { flex: 1; }
+  .f-count { font-size: 11px; color: #4a5068; margin-left: auto; flex-shrink: 0; }
+  .f-children { margin-left: 18px; border-left: 1px solid #252840; padding-left: 8px; }
+  .f-file { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; color: #94a3b8; transition: background 0.1s; }
+  .f-file:hover { background: #161820; color: #cbd5e1; }
+  .f-file-name { flex: 1; word-break: break-all; }
+  .f-file-meta { font-size: 10px; color: #374151; white-space: nowrap; display: flex; gap: 6px; flex-shrink: 0; }
+  .f-file-meta .f-date { color: #374151; }
+  .f-file-meta .f-size { color: #4a5568; }
+
+  .single-page-note { background: #162113; border: 1px solid #2d4a22; border-radius: 8px; padding: 9px 13px; font-size: 12px; color: #86efac; margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
+<div id="loader-overlay">
+  <div class="loader"></div>
+  <div id="loader-label">Fetching…</div>
+</div>
+
 <header>
   <input id="url-input" type="text" placeholder="https://your-bucket-cdn.example.com/" spellcheck="false" />
-  <button id="btn-fetch" onclick="fetchBucket(false)">Fetch</button>
-  <button id="btn-next" disabled onclick="fetchBucket(true)">Next Page ›</button>
-  <button id="btn-copy" onclick="copyAll()">Copy All</button>
-  <button id="btn-clear" onclick="clearAll()">Clear</button>
+  <button class="btn" id="btn-fetch" onclick="startFetch()">Fetch</button>
+  <button class="btn" id="btn-next" disabled onclick="fetchPage()">Next ›</button>
+  <button class="btn" id="btn-load-all" disabled onclick="loadAll()">Load All</button>
+  <button class="btn" id="btn-mode" onclick="toggleMode()">📁 Folder</button>
+  <button class="btn" id="btn-txt" onclick="downloadTxt()">⬇ TXT</button>
+  <button class="btn" id="btn-clear" onclick="clearAll()">✕</button>
 </header>
 
 <div id="progress-bar"></div>
 <div id="status"></div>
-
 <div class="stats-bar" id="stats-bar" style="display:none">
-  Total loaded: <span id="stat-count">0</span> keys &nbsp;|&nbsp;
-  Pages fetched: <span id="stat-pages">0</span> &nbsp;|&nbsp;
-  Has more: <span id="stat-more">—</span> &nbsp;|&nbsp;
-  Bucket: <span id="stat-bucket">—</span>
+  Keys: <span id="stat-count">0</span> &nbsp;|&nbsp; Pages: <span id="stat-pages">0</span> &nbsp;|&nbsp; More: <span id="stat-more">—</span> &nbsp;|&nbsp; Bucket: <span id="stat-bucket">—</span>
 </div>
 
 <div id="output">
@@ -202,192 +128,295 @@
 </div>
 
 <script>
-  let allKeys = [];
+  let allEntries = [];
   let nextMarker = '';
   let isTruncated = false;
   let baseUrl = '';
   let pageCount = 0;
-  let listEl = null;
+  let mode = 'link';
+  let singlePageDetected = false;
+  let stopAll = false;
 
-  function setStatus(msg, type = '') {
-    const el = document.getElementById('status');
-    el.textContent = msg;
-    el.className = type;
-  }
+  const $ = id => document.getElementById(id);
 
-  function setProgress(pct) {
-    document.getElementById('progress-bar').style.width = pct + '%';
-  }
+  function setStatus(msg, type = '') { const e = $('status'); e.textContent = msg; e.className = type; }
+  function setProgress(p) { $('progress-bar').style.width = p + '%'; }
+  function showLoader(label) { $('loader-overlay').classList.add('visible'); $('loader-label').textContent = label || 'Fetching…'; }
+  function hideLoader() { $('loader-overlay').classList.remove('visible'); }
 
   function updateStats() {
-    document.getElementById('stats-bar').style.display = 'flex';
-    document.getElementById('stat-count').textContent = allKeys.length.toLocaleString();
-    document.getElementById('stat-pages').textContent = pageCount;
-    document.getElementById('stat-more').textContent = isTruncated ? 'Yes' : 'No';
-    document.getElementById('btn-next').disabled = !isTruncated;
+    $('stats-bar').style.display = 'flex';
+    $('stat-count').textContent = allEntries.length.toLocaleString();
+    $('stat-pages').textContent = pageCount;
+    $('stat-more').textContent = isTruncated && !singlePageDetected ? 'Yes' : 'No';
+    $('btn-next').disabled = !isTruncated || singlePageDetected;
+    $('btn-load-all').disabled = !isTruncated || singlePageDetected;
   }
 
-  function parseSize(bytes) {
-    if (bytes === null || bytes === undefined) return '';
-    const n = parseInt(bytes);
+  function parseSize(b) {
+    if (!b) return '';
+    const n = parseInt(b);
     if (isNaN(n)) return '';
     if (n < 1024) return n + ' B';
-    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
-    if (n < 1073741824) return (n / 1048576).toFixed(1) + ' MB';
-    return (n / 1073741824).toFixed(2) + ' GB';
+    if (n < 1048576) return (n/1024).toFixed(1) + ' KB';
+    if (n < 1073741824) return (n/1048576).toFixed(1) + ' MB';
+    return (n/1073741824).toFixed(2) + ' GB';
   }
 
-  async function fetchBucket(useMarker) {
-    const rawUrl = document.getElementById('url-input').value.trim();
-    if (!rawUrl) { setStatus('Please enter a bucket URL.', 'error'); return; }
+  function fmtDate(s) {
+    if (!s) return '';
+    try { return new Date(s).toISOString().slice(0,10); } catch { return ''; }
+  }
 
-    if (!useMarker) {
-      baseUrl = rawUrl.split('?')[0];
-      if (!baseUrl.endsWith('/')) baseUrl += '/';
-      allKeys = [];
-      nextMarker = '';
-      pageCount = 0;
-      listEl = null;
-      document.getElementById('output').innerHTML = '';
-      document.getElementById('stats-bar').style.display = 'none';
-      document.getElementById('stat-bucket').textContent = '—';
-    }
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
-    let fetchUrl = baseUrl;
-    if (useMarker && nextMarker) {
-      fetchUrl += '?marker=' + encodeURIComponent(nextMarker);
-    }
-
-    document.getElementById('btn-fetch').disabled = true;
-    document.getElementById('btn-next').disabled = true;
-    setStatus('Fetching ' + fetchUrl + ' …', 'loading');
-    setProgress(30);
-
+  async function doFetch(url) {
     try {
-      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(fetchUrl);
-      let res, text;
-
-      try {
-        res = await fetch(fetchUrl);
-        if (!res.ok) throw new Error('Direct fetch failed: ' + res.status);
-        text = await res.text();
-      } catch (e) {
-        setStatus('Direct fetch blocked (CORS), trying proxy…', 'loading');
-        res = await fetch(proxyUrl);
-        if (!res.ok) throw new Error('Proxy fetch failed: ' + res.status);
-        text = await res.text();
-      }
-
-      setProgress(70);
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(text, 'application/xml');
-
-      const parseErr = xml.querySelector('parsererror');
-      if (parseErr) throw new Error('XML parse error — response may not be a valid XML bucket listing.');
-
-      const nm = xml.querySelector('NextMarker');
-      nextMarker = nm ? nm.textContent.trim() : '';
-
-      const trunc = xml.querySelector('IsTruncated');
-      isTruncated = trunc && trunc.textContent.trim().toLowerCase() === 'true';
-
-      const bucketName = xml.querySelector('Name');
-      if (bucketName) document.getElementById('stat-bucket').textContent = bucketName.textContent.trim();
-
-      const contents = xml.querySelectorAll('Contents');
-      const newKeys = [];
-
-      contents.forEach(c => {
-        const key = c.querySelector('Key');
-        const size = c.querySelector('Size');
-        if (key) {
-          newKeys.push({
-            key: key.textContent.trim(),
-            size: size ? size.textContent.trim() : null
-          });
-        }
-      });
-
-      allKeys = allKeys.concat(newKeys.map(k => k.key));
-      pageCount++;
-
-      const outputEl = document.getElementById('output');
-      if (!listEl) {
-        outputEl.innerHTML = '';
-        listEl = document.createElement('ul');
-        listEl.className = 'link-list';
-        outputEl.appendChild(listEl);
-      }
-
-      const divider = document.createElement('div');
-      divider.className = 'page-divider';
-      divider.textContent = 'Page ' + pageCount + ' — ' + newKeys.length + ' keys';
-      outputEl.insertBefore(divider, listEl);
-      outputEl.appendChild(listEl);
-
-      newKeys.forEach(({key, size}) => {
-        const li = document.createElement('li');
-        const fullUrl = baseUrl + key;
-        li.innerHTML = `<a href="${escapeHtml(fullUrl)}" target="_blank" rel="noopener">${escapeHtml(fullUrl)}</a><span class="size">${escapeHtml(parseSize(size))}</span>`;
-        listEl.appendChild(li);
-      });
-
-      setProgress(100);
-      updateStats();
-      setStatus(`Loaded ${newKeys.length} keys (total: ${allKeys.length}). ` + (isTruncated ? `More available — click "Next Page".` : 'All keys loaded.'), 'success');
-      setTimeout(() => setProgress(0), 800);
-
-      if (newKeys.length > 0) {
-        listEl.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-    } catch (err) {
-      setProgress(0);
-      setStatus('Error: ' + err.message, 'error');
-      console.error(err);
-    } finally {
-      document.getElementById('btn-fetch').disabled = false;
-      updateStats();
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(r.status);
+      return await r.text();
+    } catch {
+      const r2 = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+      if (!r2.ok) throw new Error('Proxy failed: ' + r2.status);
+      return await r2.text();
     }
   }
 
-  function copyAll() {
-    if (!allKeys.length) { setStatus('Nothing to copy yet.', 'error'); return; }
-    const text = allKeys.map(k => baseUrl + k).join('\n');
-    navigator.clipboard.writeText(text).then(() => {
-      setStatus('Copied ' + allKeys.length + ' links to clipboard.', 'success');
-    }).catch(() => {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      setStatus('Copied ' + allKeys.length + ' links to clipboard.', 'success');
+  function parsePage(text) {
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'application/xml');
+    if (xml.querySelector('parsererror')) throw new Error('XML parse error.');
+
+    const nm = xml.querySelector('NextMarker');
+    const newMarker = nm ? nm.textContent.trim() : '';
+    const trunc = xml.querySelector('IsTruncated');
+    const truncated = trunc && trunc.textContent.trim().toLowerCase() === 'true';
+    const bucketEl = xml.querySelector('Name');
+    if (bucketEl) $('stat-bucket').textContent = bucketEl.textContent.trim();
+
+    const entries = [];
+    xml.querySelectorAll('Contents').forEach(c => {
+      const key = c.querySelector('Key');
+      const size = c.querySelector('Size');
+      const lm = c.querySelector('LastModified');
+      if (key) entries.push({ key: key.textContent.trim(), size: size ? size.textContent.trim() : '', date: lm ? lm.textContent.trim() : '' });
     });
+
+    return { entries, newMarker, truncated };
+  }
+
+  async function startFetch() {
+    const rawUrl = $('url-input').value.trim();
+    if (!rawUrl) { setStatus('Please enter a bucket URL.', 'error'); return; }
+    baseUrl = rawUrl.split('?')[0];
+    if (!baseUrl.endsWith('/')) baseUrl += '/';
+    allEntries = []; nextMarker = ''; pageCount = 0; isTruncated = false; singlePageDetected = false; stopAll = false;
+    $('output').innerHTML = ''; $('stats-bar').style.display = 'none';
+    await fetchPage();
+  }
+
+  async function fetchPage() {
+    const url = nextMarker ? baseUrl + '?marker=' + encodeURIComponent(nextMarker) : baseUrl;
+    setBusy(true); showLoader('Fetching page ' + (pageCount + 1) + '…');
+    setStatus('Fetching…', 'loading'); setProgress(40);
+    try {
+      const text = await doFetch(url);
+      const { entries, newMarker, truncated } = parsePage(text);
+
+      if (pageCount > 0 && (entries.length === 0 || (newMarker && newMarker === nextMarker))) {
+        singlePageDetected = true; isTruncated = false;
+        showSinglePageNote();
+        setStatus('Marker returned no new keys — this bucket only exposes one page.', 'warn');
+        updateStats(); return;
+      }
+
+      allEntries = allEntries.concat(entries);
+      nextMarker = newMarker; isTruncated = truncated; pageCount++;
+      setProgress(100); setTimeout(() => setProgress(0), 600);
+      renderOutput(); updateStats();
+      setStatus(`Loaded ${entries.length} keys (total: ${allEntries.length.toLocaleString()}). ` + (isTruncated ? 'More available.' : 'All keys loaded.'), 'success');
+    } catch(err) {
+      setProgress(0); setStatus('Error: ' + err.message, 'error');
+    } finally {
+      setBusy(false); hideLoader();
+    }
+  }
+
+  async function loadAll() {
+    if (!isTruncated || singlePageDetected) return;
+    stopAll = false;
+    while (isTruncated && !stopAll && !singlePageDetected) {
+      const url = baseUrl + '?marker=' + encodeURIComponent(nextMarker);
+      showLoader('Loading all… page ' + (pageCount + 1));
+      setStatus('Loading all… page ' + (pageCount + 1) + ' (' + allEntries.length.toLocaleString() + ' keys so far)', 'loading');
+      setBusy(true);
+      try {
+        const text = await doFetch(url);
+        const { entries, newMarker, truncated } = parsePage(text);
+        if (entries.length === 0 || (newMarker && newMarker === nextMarker)) {
+          singlePageDetected = true; isTruncated = false;
+          showSinglePageNote();
+          setStatus('Reached end of available pages.', 'warn');
+          break;
+        }
+        allEntries = allEntries.concat(entries);
+        nextMarker = newMarker; isTruncated = truncated; pageCount++;
+        updateStats();
+        await new Promise(r => setTimeout(r, 80));
+      } catch(err) {
+        setStatus('Error: ' + err.message, 'error'); break;
+      }
+    }
+    setBusy(false); hideLoader(); renderOutput(); updateStats();
+    if (!singlePageDetected) setStatus(`Done! ${allEntries.length.toLocaleString()} keys across ${pageCount} pages.`, 'success');
+  }
+
+  function setBusy(v) {
+    $('btn-fetch').disabled = v;
+    if (v) { $('btn-next').disabled = true; $('btn-load-all').disabled = true; }
+    else updateStats();
+  }
+
+  function showSinglePageNote() {
+    const out = $('output');
+    if (!out.querySelector('.single-page-note')) {
+      const n = document.createElement('div');
+      n.className = 'single-page-note';
+      n.textContent = 'ℹ️ This bucket only exposes a single page of results — pagination is not available.';
+      out.prepend(n);
+    }
+  }
+
+  function toggleMode() {
+    mode = mode === 'link' ? 'folder' : 'link';
+    const btn = $('btn-mode');
+    if (mode === 'folder') { btn.textContent = '🔗 Links'; btn.classList.add('active'); }
+    else { btn.textContent = '📁 Folder'; btn.classList.remove('active'); }
+    renderOutput();
+  }
+
+  function renderOutput() {
+    if (mode === 'link') renderLinks();
+    else renderFolders();
+  }
+
+  function renderLinks() {
+    const out = $('output');
+    const savedNote = out.querySelector('.single-page-note');
+    out.innerHTML = '';
+    if (savedNote) out.appendChild(savedNote);
+    if (!allEntries.length) return;
+    const ul = document.createElement('ul');
+    ul.className = 'link-list';
+    allEntries.forEach(({key, size, date}) => {
+      const li = document.createElement('li');
+      const fullUrl = baseUrl + key;
+      li.innerHTML = `<a href="${esc(fullUrl)}" target="_blank" rel="noopener">${esc(fullUrl)}</a><span class="meta">${fmtDate(date) ? `<span class="date">${esc(fmtDate(date))}</span>` : ''}${parseSize(size) ? `<span class="size">${esc(parseSize(size))}</span>` : ''}</span>`;
+      ul.appendChild(li);
+    });
+    out.appendChild(ul);
+  }
+
+  function renderFolders() {
+    const out = $('output');
+    const savedNote = out.querySelector('.single-page-note');
+    out.innerHTML = '';
+    if (savedNote) out.appendChild(savedNote);
+    if (!allEntries.length) return;
+
+    // Build tree
+    const root = { __files: [] };
+    allEntries.forEach(({key, size, date}) => {
+      const parts = key.split('/');
+      let node = root;
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (!parts[i]) continue;
+        if (!node[parts[i]]) node[parts[i]] = { __files: [] };
+        node = node[parts[i]];
+      }
+      const fname = parts[parts.length - 1];
+      if (fname) node.__files.push({ name: fname, size, date });
+    });
+
+    function countNode(n) {
+      let c = n.__files ? n.__files.length : 0;
+      Object.keys(n).forEach(k => { if (k !== '__files') c += countNode(n[k]); });
+      return c;
+    }
+
+    function buildTree(node) {
+      const wrap = document.createElement('div');
+      Object.keys(node).sort().forEach(k => {
+        if (k === '__files') return;
+        const child = node[k];
+        const count = countNode(child);
+        const folderDiv = document.createElement('div');
+        folderDiv.className = 'f-folder';
+
+        const row = document.createElement('div');
+        row.className = 'f-folder-row';
+        row.innerHTML = `<span class="f-toggle">▶</span><span class="f-icon">📁</span><span class="f-name">${esc(k)}</span><span class="f-count">${count.toLocaleString()}</span>`;
+
+        const children = buildTree(child);
+        children.style.display = 'none';
+        children.className = 'f-children';
+
+        row.addEventListener('click', () => {
+          const open = children.style.display !== 'none';
+          children.style.display = open ? 'none' : 'block';
+          row.querySelector('.f-toggle').textContent = open ? '▶' : '▼';
+          row.querySelector('.f-icon').textContent = open ? '📁' : '📂';
+        });
+
+        folderDiv.appendChild(row);
+        folderDiv.appendChild(children);
+        wrap.appendChild(folderDiv);
+      });
+
+      if (node.__files) {
+        node.__files.forEach(({name, size, date}) => {
+          const fd = document.createElement('div');
+          fd.className = 'f-file';
+          const s = parseSize(size); const d = fmtDate(date);
+          fd.innerHTML = `<span class="f-file-name">${esc(name)}</span><span class="f-file-meta">${d?`<span class="f-date">${esc(d)}</span>`:''}${s?`<span class="f-size">${esc(s)}</span>`:''}</span>`;
+          wrap.appendChild(fd);
+        });
+      }
+      return wrap;
+    }
+
+    const treeWrap = document.createElement('div');
+    treeWrap.className = 'folder-tree';
+    const rootEl = buildTree(root);
+    rootEl.style.display = 'block';
+    treeWrap.appendChild(rootEl);
+    out.appendChild(treeWrap);
+  }
+
+  function downloadTxt() {
+    if (!allEntries.length) { setStatus('Nothing to download yet.', 'error'); return; }
+    const blob = new Blob([allEntries.map(e => baseUrl + e.key).join('\n')], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const host = baseUrl.replace(/https?:\/\//,'').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,40);
+    a.download = 'bucket_' + host + '.txt';
+    a.click();
+    setStatus('Downloaded ' + allEntries.length.toLocaleString() + ' links.', 'success');
   }
 
   function clearAll() {
-    allKeys = [];
-    nextMarker = '';
-    isTruncated = false;
-    baseUrl = '';
-    pageCount = 0;
-    listEl = null;
-    document.getElementById('output').innerHTML = '<div class="empty-state"><div class="icon">🪣</div><h2>Enter a bucket URL above and click Fetch</h2><p style="font-size:13px;margin-top:4px;">Supports XML S3-compatible bucket listings (AWS, Tencent COS, etc.)</p></div>';
-    document.getElementById('stats-bar').style.display = 'none';
-    document.getElementById('btn-next').disabled = true;
-    setStatus('');
-    setProgress(0);
+    stopAll = true;
+    allEntries = []; nextMarker = ''; isTruncated = false; baseUrl = ''; pageCount = 0; singlePageDetected = false;
+    $('output').innerHTML = '<div class="empty-state"><div class="icon">🪣</div><h2>Enter a bucket URL above and click Fetch</h2><p style="font-size:13px;margin-top:4px;">Supports XML S3-compatible bucket listings</p></div>';
+    $('stats-bar').style.display = 'none';
+    $('btn-next').disabled = true; $('btn-load-all').disabled = true;
+    setStatus(''); setProgress(0); hideLoader();
+    if (mode === 'folder') toggleMode();
   }
 
-  function escapeHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  document.getElementById('url-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') fetchBucket(false);
-  });
+  $('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') startFetch(); });
 </script>
 </body>
 </html>
